@@ -92,17 +92,18 @@ class PostProcessor(nn.Module):
                     boxlist = self.filter_results(boxlist, num_classes)
                 else:
                     # boxlist_pre = self.filter_results(boxlist, num_classes)
-                    boxlist = self.filter_results_nm(boxlist, num_classes)
+                    filtered_boxlist = self.filter_results_nm(boxlist, num_classes)
 
                     # to enforce minimum number of detections per image
                     # we will do a binary search on the confidence threshold
                     score_thresh = 0.05
-                    while len(boxlist) < self.min_detections_per_img:
+                    while len(filtered_boxlist) < self.min_detections_per_img:
                         score_thresh /= 2.0
                         print(("\nNumber of proposals {} is too small, "
                                "retrying filter_results with score thresh"
-                               " = {}").format(len(boxlist), score_thresh))
-                        boxlist = self.filter_results_nm(boxlist, num_classes, thresh=score_thresh)
+                               " = {}").format(len(filtered_boxlist), score_thresh))
+                        filtered_boxlist = self.filter_results_nm(boxlist, num_classes, thresh=score_thresh)
+                    boxlist = filtered_boxlist
             if len(boxlist) == 0:
                 import pdb; pdb.set_trace()
 
