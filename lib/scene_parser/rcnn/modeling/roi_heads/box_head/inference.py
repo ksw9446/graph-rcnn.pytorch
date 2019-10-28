@@ -7,7 +7,7 @@ from lib.scene_parser.rcnn.structures.bounding_box import BoxList
 from lib.scene_parser.rcnn.structures.boxlist_ops import boxlist_nms
 from lib.scene_parser.rcnn.structures.boxlist_ops import cat_boxlist
 from lib.scene_parser.rcnn.modeling.box_coder import BoxCoder
-
+import copy
 
 class PostProcessor(nn.Module):
     """
@@ -98,14 +98,19 @@ class PostProcessor(nn.Module):
                     # we will do a binary search on the confidence threshold
                     score_thresh = 0.05
                     while len(filtered_boxlist) < self.min_detections_per_img:
+                        if score_thresh < 0.025:
+                            filtered_boxlist = self.filter_results_nm(boxlist, num_classes, thresh=-1.0)
+                            break
                         score_thresh /= 2.0
                         print(("\nNumber of proposals {} is too small, "
                                "retrying filter_results with score thresh"
                                " = {}").format(len(filtered_boxlist), score_thresh))
                         filtered_boxlist = self.filter_results_nm(boxlist, num_classes, thresh=score_thresh)
+
                     boxlist = filtered_boxlist
             if len(boxlist) == 0:
-                import pdb; pdb.set_trace()
+                raise ValueError('zero bbox')
+               #import pdb; pdb.set_trace()
 
             results.append(boxlist)
         return results
@@ -139,7 +144,7 @@ class PostProcessor(nn.Module):
         # if we had multi-class NMS, we could perform this directly on the boxlist
         boxes = boxlist.bbox.reshape(-1, num_classes * 4)
         scores = boxlist.get_field("scores").reshape(-1, num_classes)
-        logits = BoxList.get_field("logits").reshape(-1, num_classes)
+        logits = boxlist.get_field("logits").reshape(-1, num_classes)  ## BoxList => boxlist
         features = boxlist.get_field("features")
 
         device = scores.device

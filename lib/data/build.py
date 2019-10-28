@@ -58,8 +58,10 @@ def build_data_loader(cfg, split="train", num_im=-1, is_distributed=False, start
     if cfg.DATASET.NAME == "vg" and cfg.DATASET.MODE == "benchmark":
         transforms = build_transforms(cfg, is_train=True if split=="train" else False)
         dataset = vg_hdf5(cfg, split=split, transforms=transforms, num_im=num_im)
-        sampler = make_data_sampler(dataset, True if split == "train" else False, is_distributed)
+        #sampler = make_data_sampler(dataset, True if split == "train" else False, is_distributed)
+        sampler = make_data_sampler(dataset, False, is_distributed) # no shuffle ##
         images_per_batch = cfg.DATASET.TRAIN_BATCH_SIZE if split == "train" else cfg.DATASET.TEST_BATCH_SIZE
+
         if get_rank() == 0:
             print("images_per_batch: {}, num_gpus: {}".format(images_per_batch, num_gpus))
         images_per_gpu = images_per_batch // num_gpus if split == "train" else images_per_batch
@@ -70,6 +72,8 @@ def build_data_loader(cfg, split="train", num_im=-1, is_distributed=False, start
             dataset, sampler, aspect_grouping, images_per_gpu, num_iters, start_iter
         )
         collator = BatchCollator(cfg.DATASET.SIZE_DIVISIBILITY)
+        if split != 'train': ##
+            images_per_batch = 0 ##
         dataloader = data.DataLoader(dataset,
                 num_workers=images_per_batch,
                 batch_sampler=batch_sampler,

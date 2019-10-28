@@ -114,6 +114,8 @@ class SceneParser(GeneralizedRCNN):
         features = self.backbone(images.tensors)
         proposals, proposal_losses = self.rpn(images, features, targets)
         scene_parser_losses = {}
+        #print('self.roi_heads', True if self.roi_heads else False) ##
+        #print('self.rel_heads', True if self.rel_heads else False)  ##
         if self.roi_heads:
             x, detections, roi_heads_loss = self.roi_heads(features, proposals, targets)
             result = detections
@@ -173,6 +175,8 @@ def build_scene_parser(cfg):
 def build_scene_parser_optimizer(cfg, model, local_rank=0, distributed=False):
     save_to_disk = True
     save_dir = get_save_dir(cfg)
+    print(save_dir)
+    #exit()
     optimizer = make_optimizer(cfg, model)
     scheduler = make_lr_scheduler(cfg, optimizer)
     if distributed:

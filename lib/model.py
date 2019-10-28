@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import os
 import datetime
 import logging
@@ -122,13 +123,20 @@ class SceneGraphGeneration:
         self.scene_parser.train()
         start_training_time = time.time()
         end = time.time()
+
+        num_error = 0
         for i, data in enumerate(self.data_loader_train, start_iter):
             data_time = time.time() - end
             self.arguments["iteration"] = i
             self.sp_scheduler.step()
             imgs, targets, _ = data
             imgs = imgs.to(self.device); targets = [target.to(self.device) for target in targets]
-            loss_dict = self.scene_parser(imgs, targets)
+            try:
+                loss_dict = self.scene_parser(imgs, targets)
+            except ValueError:
+                num_error += 1
+                print('\n** zero bbox {}th, iter_number:{}\n'.format(num_error, i))
+                continue
             losses = sum(loss for loss in loss_dict.values())
 
             # reduce losses over all GPUs for logging purposes
@@ -138,6 +146,7 @@ class SceneGraphGeneration:
 
             self.sp_optimizer.zero_grad()
             losses.backward()
+            torch.nn.utils.clip_grad_norm_(self.scene_parser.parameters(), 5.)
             self.sp_optimizer.step()
 
             batch_time = time.time() - end
@@ -206,54 +215,128 @@ class SceneGraphGeneration:
             cv2.imwrite(os.path.join(visualize_folder, "detection_{}.jpg".format(img_ids[i])), result)
 
     def test(self, timer=None, visualize=False):
+        # 기존 코드:
+        #  - 13000iter쯤에 omm 오류 발생
+        #  - 주 원인 : iter마다 output을 targets_dict, results_dict, results_pred_dict, reg_recalls에 저장
+        #    => 평가가 종료된 뒤에 모든 결과를 이용하여 OD, SGG score 계산
+        # 현재 수정한 코드:
+        #  - results_pred_dict, targets_dict, reg_recalls를 제거하고 SG_evalutator를 새로 구현 (100개 결과를 대상으로 기존 score와 비교했을 때 동일함)
+        #    => 매 iter마다 SGG score를 계산하도록함 (OD는 그대로)
+        #  - 대신 test시 batch size는 반드시 1로해야함
+        #  - 또 메모리 오류('killed')가 발생하면 results_dict를 손봐야할듯
+        #  - visualize시, GT/PRED triple 출력되도록 기능 추가함
         """
         main body for testing scene graph generation model
         """
         logger = logging.getLogger("scene_graph_generation.inference")
         logger.info("Start evaluating")
         self.scene_parser.eval()
-        targets_dict = {}
-        results_dict = {}
-        if self.cfg.MODEL.RELATION_ON:
-            results_pred_dict = {}
+        #targets_dict = {}
+        results_dict = {}  # 메모리 오류나면 얘도 안쓰는 방법으로 바꿔야함
+        # if self.cfg.MODEL.RELATION_ON:
+        #     results_pred_dict = {}
         cpu_device = torch.device("cpu")
         total_timer = Timer()
         inference_timer = Timer()
         total_timer.tic()
-        reg_recalls = []
+        #reg_recalls = []
+        print('self.data_loader_test#:', len(self.data_loader_test))
+        sg_evaluator = SG_evaluator(self.data_loader_test.dataset)
         for i, data in enumerate(self.data_loader_test, 0):
             imgs, targets, image_ids = data
             imgs = imgs.to(self.device); targets = [target.to(self.device) for target in targets]
             if i % 10 == 0:
                 logger.info("inference on batch {}/{}...".format(i, len(self.data_loader_test)))
+            if i != 0 and i % 5000 == 0: ##
+                if self.cfg.MODEL.RELATION_ON:
+                    sg_evaluator.print()
             with torch.no_grad():
                 if timer:
                     timer.tic()
                 output = self.scene_parser(imgs)
+
                 if self.cfg.MODEL.RELATION_ON:
+                    #print(output) ##
                     output, output_pred = output
                     output_pred = [o.to(cpu_device) for o in output_pred]
-                ious = bbox_overlaps(targets[0].bbox, output[0].bbox)
-                reg_recall = (ious.max(1)[0] > 0.5).sum().item() / ious.shape[0]
-                reg_recalls.append(reg_recall)
+                #ious = bbox_overlaps(targets[0].bbox, output[0].bbox)
+                #reg_recall = (ious.max(1)[0] > 0.5).sum().item() / ious.shape[0]
+                #reg_recalls.append(reg_recall)
                 if timer:
                     torch.cuda.synchronize()
                     timer.toc()
                 output = [o.to(cpu_device) for o in output]
+                targets = [t.to(cpu_device) for t in targets] ##
+                torch.cuda.empty_cache() ##
                 if visualize:
+                    #output : [BoxList(num_boxes=X, image_width=1024, image_height=768, mode=xyxy)]
+                    # output[0].bbox => bounding boxes [[xmin, ymin, xmax, ymax],]
+                    # output[0].get_field('labels') => labels [int,]
+                    # output[0].extra_fields.keys() => {'labels', 'scores', 'logits', 'features'}
+
+                    #output_pred : [BoxPairList(num_boxes=X*(X-1), image_width=1024, image_height=768, mode=xyxy)]
+                    # output_pred[0].bbox => bbox pairs [[xmin1, ymin1, xmax1, ymax1, xmin2, ymin2, xmax2, ymax2],]
+                    # output_pred[0].get_field('idx_pairs') => box idxs [[0, 1], [0, 2], ...]
+                    # output_pred[0].get_field('scores') => score#:51 [[...(#51)], [...(#51)], ]
+                    # output_pred[0].extra_fields.keys() => {'idx_pairs', 'scores'}
+
+                    #targets : [BoxPairList(num_boxes=Y, image_width=1024, image_height=768, mode=xyxy)]
+                    # targets[0].get_field('labels') => obj_labels [...]
+                    # targets[0].get_field('pred_labels') => rel_matrix (Y*Y) [[0, 0, 0, 43, 0, ...], ...]
+                    # targets[0].get_field('relation_labels') => triples [[sub_id, rel_label, obj_id], ]
+                    # targets[0].extra_fields.keys() => {'labels', 'pred_labels', 'relation_labels'}
+
+                    # self.data_loader_test.dataset.ind_to_classes
+                    # self.data_loader_test.dataset.ind_to_predicates
+                    #import pdb
+                    #pdb.set_trace()
+                    print('')
+                    print(f'*img_id: {image_ids}')
                     self.visualize_detection(self.data_loader_test.dataset, image_ids, imgs, output)
+
+                    try:
+                    ##
+                        obj_i2s = self.data_loader_test.dataset.ind_to_classes
+                        rel_i2s = self.data_loader_test.dataset.ind_to_predicates
+                        print('* GT *')
+                        for _i, (sub_id, obj_id, rel_label) in enumerate(targets[0].get_field('relation_labels')):
+                            sub_label = targets[0].get_field('labels')[sub_id]
+                            obj_label = targets[0].get_field('labels')[obj_id]
+                            print(f'  {_i+1}. {obj_i2s[sub_label]} - {rel_i2s[rel_label]} - {obj_i2s[obj_label]}')
+
+                        print('\n* PRED *')
+                        obj_labels = output[0].get_field('labels')
+                        rel_scores = np.array(output_pred[0].get_field('scores')) # (Y, 51)
+                        rel_labels = rel_scores.argmax(-1) # (Y)
+                        rel_idxs = np.logical_and(rel_labels != 0, rel_scores.max(-1) > 0.2)  # not background and threshold
+                        bbox_id_pairs = np.array(output_pred[0].get_field('idx_pairs'))
+
+                        for _i, ((sub_id, obj_id), rel_label) in enumerate(zip(bbox_id_pairs[rel_idxs], rel_labels[rel_idxs])):
+                            print(f'  {_i+1}. {obj_i2s[obj_labels[sub_id]]} - {rel_i2s[rel_label]} - {obj_i2s[obj_labels[obj_id]]}')
+                        print('')
+                    ##
+                    except Exception as e:
+                        print(e)
+                        import pdb
+                        pdb.set_trace()
+                        print('')
+
+
             results_dict.update(
                 {img_id: result for img_id, result in zip(image_ids, output)}
             )
-            targets_dict.update(
-                {img_id: target for img_id, target in zip(image_ids, targets)}
-            )
+            # targets_dict.update(
+            #     {img_id: target for img_id, target in zip(image_ids, targets)}
+            # )
             if self.cfg.MODEL.RELATION_ON:
-                results_pred_dict.update(
-                    {img_id: result for img_id, result in zip(image_ids, output_pred)}
-                )
+                # results_pred_dict.update(
+                #     {img_id: result for img_id, result in zip(image_ids, output_pred)}
+                # )
+                sg_evaluator.update_result(image_ids[0], output[0], output_pred[0])  ##
             if self.cfg.instance > 0 and i > self.cfg.instance:
                 break
+            #print(results_dict, targets_dict, results_pred_dict)
+
         synchronize()
         total_time = total_timer.toc()
         total_time_str = get_time_str(total_time)
@@ -271,19 +354,41 @@ class SceneGraphGeneration:
                 num_devices,
             )
         )
-        predictions = self._accumulate_predictions_from_multiple_gpus(results_dict)
-        if self.cfg.MODEL.RELATION_ON:
-            predictions_pred = self._accumulate_predictions_from_multiple_gpus(results_pred_dict)
+        #predictions = self._accumulate_predictions_from_multiple_gpus(results_dict)
+        predictions = list(results_dict.values())
+        # if self.cfg.MODEL.RELATION_ON:
+        #     #predictions_pred = self._accumulate_predictions_from_multiple_gpus(results_pred_dict)
+        #     predictions_pred = list(results_pred_dict.values())
+
+        ## for test
+        #print('results_dict\n -', results_dict) # (iter,)
+        #print('predictions\n -', predictions) # (iter,)
+        #print('results_pred_dict\n -', results_pred_dict) # (iter,)
+        #print('predictions_pred\n -', predictions_pred) # (iter,)
+        #import pdb
+        #pdb.set_trace()
+        #print('')
+        #exit()
+        ##
         if not is_main_process():
             return
 
+        if self.cfg.MODEL.RELATION_ON:
+            # eval_sg_results = evaluate_sg(dataset=self.data_loader_test.dataset,
+            #                 predictions=predictions,
+            #                 predictions_pred=predictions_pred,
+            #                 output_folder=output_folder,
+            #                 **extra_args)
+
+            sg_evaluator.print()
+        '''
         output_folder = "results"
         if output_folder:
             if not os.path.exists(output_folder):
                 os.mkdir(output_folder)
             torch.save(predictions, os.path.join(output_folder, "predictions.pth"))
-            if self.cfg.MODEL.RELATION_ON:
-                torch.save(predictions_pred, os.path.join(output_folder, "predictions_pred.pth"))
+            # if self.cfg.MODEL.RELATION_ON:
+            #     torch.save(predictions_pred, os.path.join(output_folder, "predictions_pred.pth"))
 
         extra_args = dict(
             box_only=False if self.cfg.MODEL.RETINANET_ON else self.cfg.MODEL.RPN_ONLY,
@@ -295,13 +400,103 @@ class SceneGraphGeneration:
                         predictions=predictions,
                         output_folder=output_folder,
                         **extra_args)
+        '''
 
-        if self.cfg.MODEL.RELATION_ON:
-            eval_sg_results = evaluate_sg(dataset=self.data_loader_test.dataset,
-                            predictions=predictions,
-                            predictions_pred=predictions_pred,
-                            output_folder=output_folder,
-                            **extra_args)
+
+
+from .data.evaluation.sg.sg_eval import evaluate as sg_eval_func
+from .data.evaluation.sg.evaluator import BasicSceneGraphEvaluator
+
+class SG_evaluator:
+    # 메모리 문제 해결을 위해 새로 구현함 (OD는 기존 방법 그대로 사용)
+
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.evaluator = BasicSceneGraphEvaluator.all_modes(multiple_preds=False)
+
+        self.top_Ns = [20, 50, 100]
+        self.modes = ["sgdet"]
+        self.total_result_dict = {}
+        self.result_dict = {}
+        for mode in self.modes:
+            self.result_dict[mode + '_recall'] = {20:[], 50:[], 100:[]}
+            self.total_result_dict[mode + '_recall'] = {20: [0., 0], 50: [0., 0], 100: [0., 0]}
+
+        self.logger = logging.getLogger("scene_graph_generation.inference")
+
+
+    def update_result(self, image_id, prediction, prediction_pred):
+        for mode in self.modes:
+            #for image_id, (prediction, prediction_pred) in enumerate(zip(predictions, predictions_pred)):
+            img_info = self.dataset.get_img_info(image_id)
+            image_width = img_info["width"]
+            image_height = img_info["height"]
+
+            gt_boxlist = self.dataset.get_groundtruth(image_id)
+
+            gt_entry = {
+                'gt_classes': gt_boxlist.get_field("labels").numpy(),
+                'gt_relations': gt_boxlist.get_field("relation_labels").numpy().astype(int),
+                'gt_boxes': gt_boxlist.bbox.numpy(),
+            }
+
+            # import pdb; pdb.set_trace()
+            prediction = prediction.resize((image_width, image_height))
+            obj_scores = prediction.get_field("scores").numpy()
+            all_rels = prediction_pred.get_field("idx_pairs").numpy()
+            fp_pred = prediction_pred.get_field("scores").numpy()
+            # multiplier = np.ones((obj_scores.shape[0], obj_scores.shape[0]))
+            # np.fill_diagonal(multiplier, 0)
+            # fp_pred = fp_pred * multiplier.reshape(obj_scores.shape[0] * (obj_scores.shape[0] - 1), 1)
+            scores = np.column_stack((
+                obj_scores[all_rels[:,0]],
+                obj_scores[all_rels[:,1]],
+                fp_pred.max(1)
+            )).prod(1)
+            sorted_inds = np.argsort(-scores)
+            sorted_inds = sorted_inds[scores[sorted_inds] > 0] #[:100]
+
+            pred_entry = {
+                'pred_boxes': prediction.bbox.numpy(),
+                'pred_classes': prediction.get_field("labels").numpy(),
+                'obj_scores': prediction.get_field("scores").numpy(),
+                'pred_rel_inds': all_rels[sorted_inds],
+                'rel_scores': fp_pred[sorted_inds],
+            }
+
+            self.evaluator[mode].evaluate_scene_graph_entry(
+                gt_entry,
+                pred_entry,
+            )
+
+            sg_eval_func(gt_boxlist.get_field("labels"), gt_boxlist.bbox, gt_boxlist.get_field("pred_labels"),
+                    prediction.bbox, prediction.get_field("scores"), prediction.get_field("labels"),
+                    prediction_pred.get_field("idx_pairs"), prediction_pred.get_field("scores"),
+                         self.top_Ns, self.result_dict, mode)
+
+            for mode in self.modes:
+                key = mode + '_recall'
+
+                for top_N in self.top_Ns:
+                    if len(self.result_dict[key][top_N]) != 1:
+                        import pdb
+                        pdb.set_trace()
+                        print('')
+                    self.total_result_dict[key][top_N][0] += np.array(self.result_dict[key][top_N][0])
+                    self.total_result_dict[key][top_N][1] += 1
+                    self.result_dict[key][top_N] = []  ## reset
+
+    def print(self):
+        self.logger.info("performing scene graph evaluation.")
+
+        for mode in self.modes:
+            key = mode + '_recall'
+
+            self.evaluator[mode].print_stats(self.logger)
+            self.logger.info('=====================' + mode + '(IMP)' + '=========================')
+            self.logger.info("{}-recall@20: {}".format(mode, self.total_result_dict[key][20][0] / self.total_result_dict[key][20][1]))
+            self.logger.info("{}-recall@50: {}".format(mode, self.total_result_dict[key][50][0] / self.total_result_dict[key][50][1]))
+            self.logger.info("{}-recall@100: {}".format(mode, self.total_result_dict[key][100][0] / self.total_result_dict[key][100][1]))
 
 def build_model(cfg, arguments, local_rank, distributed):
     return SceneGraphGeneration(cfg, arguments, local_rank, distributed)
