@@ -25,7 +25,8 @@ class PostProcessor(nn.Module):
         box_coder=None,
         cls_agnostic_bbox_reg=False,
         bbox_aug_enabled=False,
-        relation_on=False
+        relation_on=False,
+        modes=[]
     ):
         """
         Arguments:
@@ -45,6 +46,7 @@ class PostProcessor(nn.Module):
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
         self.bbox_aug_enabled = bbox_aug_enabled
         self.relation_on = relation_on
+        self.modes = modes
 
     def forward(self, x, boxes):
         """
@@ -67,11 +69,21 @@ class PostProcessor(nn.Module):
         features = [box.get_field("features") for box in boxes]
         concat_boxes = torch.cat([a.bbox for a in boxes], dim=0)
 
+        # import pdb  ###############
+        # pdb.set_trace()
+        # print('')  ###################
+
+        if 'predcls' in self.modes or 'sgcls' in self.modes:  #######
+            boxlist = self.prepare_boxlist(boxes[0].bbox, features[0], class_prob[0], class_logit[0], image_shapes[0])
+            return [boxlist]
+
+
         if self.cls_agnostic_bbox_reg:
             box_regression = box_regression[:, -4:]
         proposals = self.box_coder.decode(
             box_regression.view(sum(boxes_per_image), -1), concat_boxes
         )
+        #print(proposals.shape)
         if self.cls_agnostic_bbox_reg:
             proposals = proposals.repeat(1, class_prob.shape[1])
 
@@ -87,6 +99,7 @@ class PostProcessor(nn.Module):
         ):
             boxlist = self.prepare_boxlist(boxes_per_img, features_per_img, prob, logit, image_shape)
             boxlist = boxlist.clip_to_image(remove_empty=False)
+            print(boxlist)
             if not self.bbox_aug_enabled:  # If bbox aug is enabled, we will do it later
                 if not self.relation_on:
                     boxlist = self.filter_results(boxlist, num_classes)
@@ -264,6 +277,8 @@ def make_roi_box_post_processor(cfg):
     min_detections_per_img = cfg.MODEL.ROI_HEADS.MIN_DETECTIONS_PER_IMG
     cls_agnostic_bbox_reg = cfg.MODEL.CLS_AGNOSTIC_BBOX_REG
     bbox_aug_enabled = cfg.TEST.BBOX_AUG.ENABLED
+    if 'predcls' in cfg.TEST.MODES or 'sgcls' in cfg.TEST.MODES:  #######
+        bbox_aug_enabled = True  #############
 
     postprocessor = PostProcessor(
         score_thresh,
@@ -273,6 +288,7 @@ def make_roi_box_post_processor(cfg):
         box_coder,
         cls_agnostic_bbox_reg,
         bbox_aug_enabled,
-        relation_on=cfg.MODEL.RELATION_ON
+        relation_on=cfg.MODEL.RELATION_ON,
+        modes=cfg.TEST.MODES
     )
     return postprocessor

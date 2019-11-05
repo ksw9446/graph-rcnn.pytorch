@@ -35,6 +35,11 @@ class SceneGraphGeneration:
         cfg.DATASET.IND_TO_OBJECT = self.data_loader_train.dataset.ind_to_classes
         cfg.DATASET.IND_TO_PREDICATE = self.data_loader_train.dataset.ind_to_predicates
 
+        #self.modes = ['sgdet']  ###
+        self.modes = ['predcls', 'sgcls'] ###
+        cfg.TEST.MODES = self.modes ###
+
+
         logger = logging.getLogger("scene_graph_generation.trainer")
         logger.info("Train data size: {}".format(len(self.data_loader_train.dataset)))
         logger.info("Test data size: {}".format(len(self.data_loader_test.dataset)))
@@ -241,11 +246,13 @@ class SceneGraphGeneration:
         total_timer.tic()
         #reg_recalls = []
         print('self.data_loader_test#:', len(self.data_loader_test))
-        sg_evaluator = SG_evaluator(self.data_loader_test.dataset)
+
+
+        sg_evaluator = SG_evaluator(self.data_loader_test.dataset, modes=self.modes)
         for i, data in enumerate(self.data_loader_test, 0):
             imgs, targets, image_ids = data
             imgs = imgs.to(self.device); targets = [target.to(self.device) for target in targets]
-            if i % 10 == 0:
+            if i % 50 == 0:
                 logger.info("inference on batch {}/{}...".format(i, len(self.data_loader_test)))
             if i != 0 and i % 5000 == 0: ##
                 if self.cfg.MODEL.RELATION_ON:
@@ -253,12 +260,12 @@ class SceneGraphGeneration:
             with torch.no_grad():
                 if timer:
                     timer.tic()
-                output = self.scene_parser(imgs)
+                output = self.scene_parser(imgs, targets) ## add targets
 
                 if self.cfg.MODEL.RELATION_ON:
                     #print(output) ##
-                    output, output_pred = output
-                    output_pred = [o.to(cpu_device) for o in output_pred]
+                    output, output_rel = output
+                    output_rel = [o.to(cpu_device) for o in output_rel]
                 #ious = bbox_overlaps(targets[0].bbox, output[0].bbox)
                 #reg_recall = (ious.max(1)[0] > 0.5).sum().item() / ious.shape[0]
                 #reg_recalls.append(reg_recall)
@@ -306,10 +313,10 @@ class SceneGraphGeneration:
 
                         print('\n* PRED *')
                         obj_labels = output[0].get_field('labels')
-                        rel_scores = np.array(output_pred[0].get_field('scores')) # (Y, 51)
+                        rel_scores = np.array(output_rel[0].get_field('scores')) # (Y, 51)
                         rel_labels = rel_scores.argmax(-1) # (Y)
                         rel_idxs = np.logical_and(rel_labels != 0, rel_scores.max(-1) > 0.2)  # not background and threshold
-                        bbox_id_pairs = np.array(output_pred[0].get_field('idx_pairs'))
+                        bbox_id_pairs = np.array(output_rel[0].get_field('idx_pairs'))
 
                         for _i, ((sub_id, obj_id), rel_label) in enumerate(zip(bbox_id_pairs[rel_idxs], rel_labels[rel_idxs])):
                             print(f'  {_i+1}. {obj_i2s[obj_labels[sub_id]]} - {rel_i2s[rel_label]} - {obj_i2s[obj_labels[obj_id]]}')
@@ -328,11 +335,12 @@ class SceneGraphGeneration:
             # targets_dict.update(
             #     {img_id: target for img_id, target in zip(image_ids, targets)}
             # )
+
             if self.cfg.MODEL.RELATION_ON:
                 # results_pred_dict.update(
                 #     {img_id: result for img_id, result in zip(image_ids, output_pred)}
                 # )
-                sg_evaluator.update_result(image_ids[0], output[0], output_pred[0])  ##
+                sg_evaluator.update_result(image_ids[0], output[0], output_rel[0])  ##
             if self.cfg.instance > 0 and i > self.cfg.instance:
                 break
             #print(results_dict, targets_dict, results_pred_dict)
@@ -410,12 +418,12 @@ from .data.evaluation.sg.evaluator import BasicSceneGraphEvaluator
 class SG_evaluator:
     # 메모리 문제 해결을 위해 새로 구현함 (OD는 기존 방법 그대로 사용)
 
-    def __init__(self, dataset):
+    def __init__(self, dataset, modes=['sgdet']):
         self.dataset = dataset
         self.evaluator = BasicSceneGraphEvaluator.all_modes(multiple_preds=False)
 
         self.top_Ns = [20, 50, 100]
-        self.modes = ["sgdet"]
+        self.modes = modes
         self.total_result_dict = {}
         self.result_dict = {}
         for mode in self.modes:
@@ -425,7 +433,7 @@ class SG_evaluator:
         self.logger = logging.getLogger("scene_graph_generation.inference")
 
 
-    def update_result(self, image_id, prediction, prediction_pred):
+    def update_result(self, image_id, prediction, prediction_rel):
         for mode in self.modes:
             #for image_id, (prediction, prediction_pred) in enumerate(zip(predictions, predictions_pred)):
             img_info = self.dataset.get_img_info(image_id)
@@ -443,8 +451,8 @@ class SG_evaluator:
             # import pdb; pdb.set_trace()
             prediction = prediction.resize((image_width, image_height))
             obj_scores = prediction.get_field("scores").numpy()
-            all_rels = prediction_pred.get_field("idx_pairs").numpy()
-            fp_pred = prediction_pred.get_field("scores").numpy()
+            all_rels = prediction_rel.get_field("idx_pairs").numpy()
+            fp_pred = prediction_rel.get_field("scores").numpy()
             # multiplier = np.ones((obj_scores.shape[0], obj_scores.shape[0]))
             # np.fill_diagonal(multiplier, 0)
             # fp_pred = fp_pred * multiplier.reshape(obj_scores.shape[0] * (obj_scores.shape[0] - 1), 1)
@@ -471,20 +479,20 @@ class SG_evaluator:
 
             sg_eval_func(gt_boxlist.get_field("labels"), gt_boxlist.bbox, gt_boxlist.get_field("pred_labels"),
                     prediction.bbox, prediction.get_field("scores"), prediction.get_field("labels"),
-                    prediction_pred.get_field("idx_pairs"), prediction_pred.get_field("scores"),
+                         prediction_rel.get_field("idx_pairs"), prediction_rel.get_field("scores"),
                          self.top_Ns, self.result_dict, mode)
 
-            for mode in self.modes:
-                key = mode + '_recall'
+        for mode in self.modes:
+            key = mode + '_recall'
 
-                for top_N in self.top_Ns:
-                    if len(self.result_dict[key][top_N]) != 1:
-                        import pdb
-                        pdb.set_trace()
-                        print('')
-                    self.total_result_dict[key][top_N][0] += np.array(self.result_dict[key][top_N][0])
-                    self.total_result_dict[key][top_N][1] += 1
-                    self.result_dict[key][top_N] = []  ## reset
+            for top_N in self.top_Ns:
+                if len(self.result_dict[key][top_N]) != 1:
+                    import pdb
+                    pdb.set_trace()
+                    print('')
+                self.total_result_dict[key][top_N][0] += np.array(self.result_dict[key][top_N][0])
+                self.total_result_dict[key][top_N][1] += 1
+                self.result_dict[key][top_N] = []  ## reset
 
     def print(self):
         self.logger.info("performing scene graph evaluation.")

@@ -112,7 +112,16 @@ class SceneParser(GeneralizedRCNN):
             raise ValueError("In training mode, targets should be passed")
         images = to_image_list(images)
         features = self.backbone(images.tensors)
-        proposals, proposal_losses = self.rpn(images, features, targets)
+        if self.training:
+            proposals, proposal_losses = self.rpn(images, features, targets)
+        else:
+            proposals, proposal_losses = self.rpn(images, features, None)
+            if 'predcls' in self.cfg.TEST.MODES or 'sgcls' in self.cfg.TEST.MODES:
+                #import pdb
+                #pdb.set_trace()
+                #print('')
+                proposals = targets
+
         scene_parser_losses = {}
         #print('self.roi_heads', True if self.roi_heads else False) ##
         #print('self.rel_heads', True if self.rel_heads else False)  ##
@@ -148,6 +157,12 @@ class SceneParser(GeneralizedRCNN):
             losses.update(scene_parser_losses)
             losses.update(proposal_losses)
             return losses
+
+        if len(detections[0].bbox) != len(proposals[0].bbox):
+            print('d', len(detections[0].bbox))
+            import pdb  ###############
+            pdb.set_trace()
+            print('')  ###################
 
         # NOTE: if object scores are updated in rel_heads, we need to ensure detections are updated accordingly
         # result = self._post_processing(result)

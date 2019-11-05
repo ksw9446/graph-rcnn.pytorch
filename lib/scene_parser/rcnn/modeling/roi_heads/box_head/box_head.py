@@ -55,6 +55,9 @@ class ROIBoxHead(torch.nn.Module):
             proposal.add_field("features", self.avgpool(feature))
         if not self.training:
             # if self.cfg.inference:
+            if 'predcls' in self.cfg.TEST.MODES or 'sgcls' in self.cfg.TEST.MODES:  #######
+                box_regression[:] = 0.
+
             result = self.post_processor((class_logits, box_regression), proposals)
             if targets:
                 result = self.loss_evaluator.prepare_labels(result, targets)

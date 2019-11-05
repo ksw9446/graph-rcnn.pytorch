@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3d0128b0-dbd2-43ea-8824-67d617147610" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/lib/model.py" afterPath="$PROJECT_DIR$/lib/model.py" />
       <change beforePath="$PROJECT_DIR$/lib/scene_parser/parser.py" afterPath="$PROJECT_DIR$/lib/scene_parser/parser.py" />
+      <change beforePath="$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/box_head.py" afterPath="$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/box_head.py" />
+      <change beforePath="$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/inference.py" afterPath="$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/inference.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,32 +20,8 @@
       <file leaf-file-name="model.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="352">
-              <caret line="31" column="40" lean-forward="false" selection-start-line="31" selection-start-column="40" selection-end-line="31" selection-end-column="40" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="resnet.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/backbone/resnet.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8712">
-              <caret line="406" column="15" lean-forward="false" selection-start-line="406" selection-start-column="15" selection-end-line="406" selection-end-column="15" />
-              <folding>
-                <element signature="e#535#569#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="batch_norm.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/layers/batch_norm.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="44">
-              <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="30" selection-end-column="31" />
+            <state relative-caret-position="88">
+              <caret line="478" column="0" lean-forward="true" selection-start-line="478" selection-start-column="0" selection-end-line="478" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -51,74 +30,40 @@
       <file leaf-file-name="parser.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/scene_parser/parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3608">
-              <caret line="175" column="22" lean-forward="false" selection-start-line="175" selection-start-column="22" selection-end-line="175" selection-end-column="22" />
-              <folding>
-                <element signature="e#58#67#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="generalized_rcnn.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/detector/generalized_rcnn.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="946">
-              <caret line="50" column="52" lean-forward="false" selection-start-line="50" selection-start-column="52" selection-end-line="50" selection-end-column="52" />
+            <state relative-caret-position="220">
+              <caret line="182" column="21" lean-forward="true" selection-start-line="182" selection-start-column="21" selection-end-line="182" selection-end-column="21" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="backbone.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/backbone/backbone.py">
+      <file leaf-file-name="inference.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/inference.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1012">
-              <caret line="53" column="29" lean-forward="false" selection-start-line="53" selection-start-column="29" selection-end-line="53" selection-end-column="29" />
+            <state relative-caret-position="792">
+              <caret line="294" column="0" lean-forward="true" selection-start-line="294" selection-start-column="0" selection-end-line="294" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="build.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="box_head.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/box_head.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1320">
+              <caret line="88" column="0" lean-forward="true" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="build.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/data/build.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="72" column="13" lean-forward="false" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="13" />
+            <state relative-caret-position="418">
+              <caret line="19" column="9" lean-forward="true" selection-start-line="19" selection-start-column="9" selection-end-line="19" selection-end-column="9" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="collate_batch.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/data/collate_batch.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="66">
-              <caret line="3" column="12" lean-forward="false" selection-start-line="3" selection-start-column="12" selection-end-line="3" selection-end-column="12" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="build.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/data/transforms/build.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="594">
-              <caret line="27" column="10" lean-forward="false" selection-start-line="27" selection-start-column="10" selection-end-line="27" selection-end-column="10" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vg_hdf5.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/data/vg_hdf5.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="41" column="27" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="27" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -138,14 +83,16 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/lib/scene_parser/parser.py" />
         <option value="$PROJECT_DIR$/lib/model.py" />
+        <option value="$PROJECT_DIR$/lib/scene_parser/parser.py" />
+        <option value="$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/inference.py" />
+        <option value="$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/box_head.py" />
+        <option value="$PROJECT_DIR$/lib/data/build.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="575" />
-    <option name="y" value="137" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="953" />
     <option name="width" value="974" />
     <option name="height" value="1047" />
   </component>
@@ -189,6 +136,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
@@ -246,11 +194,29 @@
               <item name="modeling" type="462c0819:PsiDirectoryNode" />
               <item name="backbone" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="my_graph-rcnn.pytorch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="my_graph-rcnn.pytorch" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="scene_parser" type="462c0819:PsiDirectoryNode" />
+              <item name="rcnn" type="462c0819:PsiDirectoryNode" />
+              <item name="modeling" type="462c0819:PsiDirectoryNode" />
+              <item name="roi_heads" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="my_graph-rcnn.pytorch" type="b2602c69:ProjectViewProjectNode" />
+              <item name="my_graph-rcnn.pytorch" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="scene_parser" type="462c0819:PsiDirectoryNode" />
+              <item name="rcnn" type="462c0819:PsiDirectoryNode" />
+              <item name="modeling" type="462c0819:PsiDirectoryNode" />
+              <item name="roi_heads" type="462c0819:PsiDirectoryNode" />
+              <item name="box_head" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -286,7 +252,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="953" y="0" width="974" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -296,7 +262,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.114605546" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28884026" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="R Packages" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="R Graphics" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -323,9 +289,93 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="352">
           <caret line="31" column="40" lean-forward="false" selection-start-line="31" selection-start-column="40" selection-end-line="31" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/backbone/resnet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8712">
+          <caret line="406" column="15" lean-forward="false" selection-start-line="406" selection-start-column="15" selection-end-line="406" selection-end-column="15" />
+          <folding>
+            <element signature="e#535#569#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/layers/batch_norm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="30" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3608">
+          <caret line="175" column="22" lean-forward="false" selection-start-line="175" selection-start-column="22" selection-end-line="175" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/detector/generalized_rcnn.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="946">
+          <caret line="50" column="52" lean-forward="false" selection-start-line="50" selection-start-column="52" selection-end-line="50" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/backbone/backbone.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1012">
+          <caret line="53" column="29" lean-forward="false" selection-start-line="53" selection-start-column="29" selection-end-line="53" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/data/build.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1408">
+          <caret line="72" column="13" lean-forward="false" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/data/collate_batch.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="3" column="12" lean-forward="false" selection-start-line="3" selection-start-column="12" selection-end-line="3" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/data/transforms/build.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="27" column="10" lean-forward="false" selection-start-line="27" selection-start-column="10" selection-end-line="27" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/data/vg_hdf5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="638">
+          <caret line="41" column="27" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="27" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="31" column="40" lean-forward="false" selection-start-line="31" selection-start-column="40" selection-end-line="31" selection-end-column="40" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -351,9 +401,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3608">
           <caret line="175" column="22" lean-forward="false" selection-start-line="175" selection-start-column="22" selection-end-line="175" selection-end-column="22" />
-          <folding>
-            <element signature="e#58#67#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -420,9 +468,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3608">
           <caret line="175" column="22" lean-forward="false" selection-start-line="175" selection-start-column="22" selection-end-line="175" selection-end-column="22" />
-          <folding>
-            <element signature="e#58#67#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -481,9 +527,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2530">
           <caret line="130" column="30" lean-forward="false" selection-start-line="130" selection-start-column="30" selection-end-line="130" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -535,31 +579,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/scene_parser/parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3608">
-          <caret line="175" column="22" lean-forward="false" selection-start-line="175" selection-start-column="22" selection-end-line="175" selection-end-column="22" />
-          <folding>
-            <element signature="e#58#67#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/backbone/backbone.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1012">
           <caret line="53" column="29" lean-forward="false" selection-start-line="53" selection-start-column="29" selection-end-line="53" selection-end-column="29" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="31" column="40" lean-forward="false" selection-start-line="31" selection-start-column="40" selection-end-line="31" selection-end-column="40" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -571,22 +595,54 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/data/build.py">
+    <entry file="file://$PROJECT_DIR$/lib/data/vg_hdf5.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="72" column="13" lean-forward="false" selection-start-line="72" selection-start-column="13" selection-end-line="72" selection-end-column="13" />
+        <state relative-caret-position="176">
+          <caret line="32" column="10" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="290" selection-end-column="0" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/data/vg_hdf5.py">
+    <entry file="file://$PROJECT_DIR$/lib/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="41" column="27" lean-forward="false" selection-start-line="41" selection-start-column="13" selection-end-line="41" selection-end-column="27" />
+        <state relative-caret-position="88">
+          <caret line="478" column="0" lean-forward="true" selection-start-line="478" selection-start-column="0" selection-end-line="478" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="182" column="21" lean-forward="true" selection-start-line="182" selection-start-column="21" selection-end-line="182" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/inference.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="294" column="0" lean-forward="true" selection-start-line="294" selection-start-column="0" selection-end-line="294" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/scene_parser/rcnn/modeling/roi_heads/box_head/box_head.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1320">
+          <caret line="88" column="0" lean-forward="true" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/data/build.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="19" column="9" lean-forward="true" selection-start-line="19" selection-start-column="9" selection-end-line="19" selection-end-column="9" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
