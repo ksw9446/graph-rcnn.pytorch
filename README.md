@@ -1,9 +1,10 @@
-# graph-rcnn.pytorch
-Pytorch code for our ECCV 2018 paper ["Graph R-CNN for Scene Graph Generation"](https://arxiv.org/pdf/1808.00191.pdf)
+# graph-rcnn.pytorch (forked)
 
+## What I did
 - fix out of memory(OOM) error during inference
-  - remove result dictionary
-- implement metric ('sgcls', 'predcls')
+  - remove result dictionary (result_dict keeps all results of inference for each iteration)
+  - update metric score for each interation
+- implement scene graph metric ('sgcls', 'predcls')
   - use gt boxes for proposals
 
 ## Benchmarking
